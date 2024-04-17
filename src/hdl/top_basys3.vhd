@@ -97,16 +97,16 @@ architecture top_basys3_arch of top_basys3 is
 	  component clock_divider is 
 	       generic(constant k_DIV : natural := 2 );
 	           port ( i_clk   : in std_logic;
-	                  i_reset : in std_logic;
+	                  w_resetclk : in std_logic;
 	                  o_clk   : out std_logic
 	                   );
 	             end component clock_divider;
 	             
-	             signal w_clk, w_clk2, w_reset : std_logic;
+	             signal w_clk, w_clk2 : std_logic;
 	             
       component elevator_controller_fsm is  
         port( i_clk     : in std_logic;
-              i_reset   : in std_logic;
+              w_resetFSM   : in std_logic;
               i_stop    : in std_logic;
               i_up_down : in std_logic;
               o_floor   : out std_logic_vector (3 downto 0));
@@ -155,17 +155,17 @@ generic map (k_WIDTH => 4)
          i_D2       => w_tens,
          i_D3       => w_ones,
          i_D1         => "0000",
-         i_D0         =>  "0000",
+         i_D0         => "0000",
          o_data        => w_data,
          o_sel        => w_sel
                
     );
     
     
-	elevator_controller_fsm_inst: elevator_controller_fsm
+elevator_controller_fsm_inst: elevator_controller_fsm
     port map(
         i_clk => w_clk,
-        i_reset=>btnR or btnU,
+        w_resetFSM => btnR or btnU,
         i_stop=>sw(0),
         o_floor=>w_floor(3 downto 0),
         i_up_down=>sw(1)
@@ -174,7 +174,7 @@ generic map (k_WIDTH => 4)
   clock_divider_inst2: clock_divider
     generic map (k_DIV => 100000)
     port map(
-       i_reset=>btnL or btnU,
+       w_resetCLK=> btnL or btnU,
        i_clk=>clk,
        o_clk=>w_clk2
     );
@@ -189,7 +189,7 @@ generic map (k_WIDTH => 4)
 	clock_divider_inst: clock_divider
 	generic map (k_DIV => 12500000)
 	port map(
-	   i_reset=>btnL or btnU,
+	   w_resetclk=>btnL or btnU,
 	   i_clk=>clk,
 	   o_clk=>w_clk
 	);
@@ -226,7 +226,7 @@ generic map (k_WIDTH => 4)
               "0011"when unsigned (w_floor) = 13 else 
              "0100" when unsigned (w_floor) = 14 else
              "0101" when unsigned (w_floor) = 15 else
-             "0000" when unsigned (w_floor) =16 else
+             "0110" when unsigned (w_floor) = 0 else
          
              w_floor
              ;
