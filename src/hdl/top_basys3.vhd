@@ -97,7 +97,7 @@ architecture top_basys3_arch of top_basys3 is
 	  component clock_divider is 
 	       generic(constant k_DIV : natural := 2 );
 	           port ( i_clk   : in std_logic;
-	                  w_resetclk : in std_logic;
+	                  i_reset : in std_logic;
 	                  o_clk   : out std_logic
 	                   );
 	             end component clock_divider;
@@ -106,7 +106,7 @@ architecture top_basys3_arch of top_basys3 is
 	             
       component elevator_controller_fsm is  
         port( i_clk     : in std_logic;
-              w_resetFSM   : in std_logic;
+              i_reset   : in std_logic;
               i_stop    : in std_logic;
               i_up_down : in std_logic;
               o_floor   : out std_logic_vector (3 downto 0));
@@ -140,6 +140,9 @@ architecture top_basys3_arch of top_basys3 is
                       );
                                
             end component TDM4;
+            
+            signal w_reset_CLK : std_logic;
+            signal w_reset_FSM : std_logic;
                       
             
           ---add two signals for tens and ones.
@@ -165,7 +168,7 @@ generic map (k_WIDTH => 4)
 elevator_controller_fsm_inst: elevator_controller_fsm
     port map(
         i_clk => w_clk,
-        w_resetFSM => btnR or btnU,
+        i_reset => w_reset_FSM,
         i_stop=>sw(0),
         o_floor=>w_floor(3 downto 0),
         i_up_down=>sw(1)
@@ -174,7 +177,7 @@ elevator_controller_fsm_inst: elevator_controller_fsm
   clock_divider_inst2: clock_divider
     generic map (k_DIV => 100000)
     port map(
-       w_resetCLK=> btnL or btnU,
+       i_reset=> w_reset_CLK,
        i_clk=>clk,
        o_clk=>w_clk2
     );
@@ -189,7 +192,7 @@ elevator_controller_fsm_inst: elevator_controller_fsm
 	clock_divider_inst: clock_divider
 	generic map (k_DIV => 12500000)
 	port map(
-	   w_resetclk=>btnL or btnU,
+	   i_reset=>w_reset_CLK,
 	   i_clk=>clk,
 	   o_clk=>w_clk
 	);
@@ -230,6 +233,8 @@ elevator_controller_fsm_inst: elevator_controller_fsm
          
              w_floor
              ;
-    
+             
+    w_reset_FSM <= btnR or btnU;
+    w_reset_CLK <= btnR or btnU;
      
 end top_basys3_arch;
